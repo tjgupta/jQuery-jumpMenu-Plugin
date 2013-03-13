@@ -24,7 +24,7 @@
 				keyValueObj = {},
 				i,
 				equalSignPosition;
-			for (i in pairs) {
+			for (i=0; i<pairs.length; i++) {
 				equalSignPosition = pairs[i].indexOf('=');
 				
 				if (equalSignPosition == -1) {
