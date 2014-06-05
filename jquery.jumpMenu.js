@@ -1,5 +1,5 @@
 /*!
- * jQuery jumpMenu Plugin v1.0
+ * jQuery jumpMenu Plugin v2.0
  * https://github.com/tjgupta/jQuery-jumpMenu-Plugin
  *
  * Copyright (c) Tim Gupta
@@ -17,61 +17,64 @@
  * limitations under the License.
  * ========================================================== */
 ;(function($) {
-	$.fn.jumpMenu = function(options) {
-		
-		function parseQuery(queryString) {
-			var pairs = queryString.split('&'),
-				keyValueObj = {},
-				i,
-				equalSignPosition;
-			for (i=0; i<pairs.length; i++) {
-				equalSignPosition = pairs[i].indexOf('=');
-				
-				if (equalSignPosition == -1) {
-					keyValueObj[pairs[i]] == '';
-				} else {
-					// set value equal to text after "=", and remove +'s
-					keyValueObj[ pairs[i].substring(0, equalSignPosition) ] = decodeURIComponent(pairs[i].substr(equalSignPosition+1).replace(/\+/g, ' '));
-				}
-			}
-			return keyValueObj;
-		}
+    $.fn.jumpMenu = function(formSubmit, options) {
 
-		return this.each(function() {
-			var $this = $(this),
-				settings = $.extend({
-					'formSubmit': '',
-					'clearParam': ''
-				}, options),
-				$formSubmit = $(settings.formSubmit);
-			
-			// Hide submit button
-			if ($formSubmit) {
-				$formSubmit.hide();
-			}
-				
-			$this.change(function() {
-				// First remove any beforeunload events that may be set up
-				$(window).unbind('beforeunload');
-				var val = $this.val(),
-					$form = $this.parents('form');
-				if (val != '') {
-					// Preserve existing query string besides clearParam
-					var queryString = decodeURI(location.search.substring(1));
-					if (queryString != false || queryString != '') {
-						var keyValueObj = parseQuery(queryString),
-							key;
-						for (key in keyValueObj) {
-							if (key != $this.attr('name') && key != settings.clearParam) {
-								$form.append('<input type="hidden" name="' + key + '" value="' + keyValueObj[key] + '" />');
-							}
-						}
-					}
-					
-					$form.submit();
-				}
-			});
-		});
+        function parseQuery(queryString) {
+            var pairs = queryString.split('&'),
+                keyValueObj = {},
+                keyValueSplit,
+                value;
+            $.each(pairs, function(i, pair) {
+                keyValueSplit = pair.split('=');
+                if (keyValueSplit.length === 2) {
+                    value = decodeURIComponent(keyValueSplit[1]).replace(/\+/g, ' ');
+                } else {
+                    value = '';
+                }
+                keyValueObj[keyValueSplit[0]] = value;
+            });
+            return keyValueObj;
+        }
 
-	};
+        return this.each(function() {
+            var $this = $(this),
+                settings = $.extend({
+                    'clearParam': ''
+                }, options),
+                $formSubmit = $(settings.formSubmit);
+
+            // Hide submit button
+            if ($formSubmit) {
+                $formSubmit.hide();
+            }
+
+            $this.change(function() {
+                // First remove any beforeunload events that may be set up
+                var val = $this.val(),
+                    $form = $this.closest('form'),
+                    queryString,
+                    keyValueObj,
+                    $input;
+                $(window).unbind('beforeunload');
+                if (val !== '') {
+                    // Preserve existing query string besides clearParam
+                    queryString = decodeURI(location.search.substring(1));
+                    if (queryString !== false || queryString !== '') {
+                        keyValueObj = parseQuery(queryString);
+                        $.each(keyValueObj, function(key, value) {
+                            // add hidden var to form for submit if it's not the select name or the
+                            // parameter we want to clear
+                            if (key !== $this.attr('name') && key !== settings.clearParam) {
+                                $input = $('<input type="hidden"/>').attr('name', key).val(value);
+                                $form.append($input);
+                            }
+                        });
+                    }
+
+                    $form.submit();
+                }
+            });
+        });
+
+    };
 })(jQuery);
