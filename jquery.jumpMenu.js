@@ -1,5 +1,5 @@
 /*!
- * jQuery jumpMenu Plugin v2.0
+ * jQuery jumpMenu Plugin v2.0.0
  * https://github.com/tjgupta/jQuery-jumpMenu-Plugin
  *
  * Copyright (c) Tim Gupta
